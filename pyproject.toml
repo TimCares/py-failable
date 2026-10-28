@@ -1,0 +1,146 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "failable"
+description = "Rust-like error handling for Python: turn raised exceptions into explicit Result values."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+authors = [{ name = "Tim Cares", email = "tim.cares@icloud.com" }]
+keywords = ["result", "either", "error-handling", "exceptions", "rust", "typing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/TimCares/py-failable"
+Repository = "https://github.com/TimCares/py-failable"
+Issues = "https://github.com/TimCares/py-failable/issues"
+Changelog = "https://github.com/TimCares/py-failable/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+dev = [
+    "commitizen>=4.16.2",
+    "pre-commit>=4.6.0",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "python-semantic-release>=10.5.3",
+    "ruff>=0.14",
+    "ty>=0.0.91",
+]
+
+[tool.hatch.version]
+path = "src/failable/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "LICENSE", "CHANGELOG*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = [
+    "--strict-config",
+    "--strict-markers",
+    "--cov=failable",
+    "--cov-report=term-missing",
+    "--cov-fail-under=100",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["failable"]
+
+[tool.coverage.report]
+exclude_also = ["if TYPE_CHECKING:", "\\.\\.\\."]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "COM812", # conflicts with the formatter
+    "CPY001", # no per-file copyright headers
+    "D203",   # incompatible with D211
+    "D213",   # incompatible with D212
+]
+
+[tool.ruff.lint.per-file-ignores]
+# The no-op variant methods keep their parameters for signature symmetry.
+"src/failable/_result.py" = ["ARG002"]
+"tests/*" = [
+    "ANN",     # annotating every test adds no safety
+    "D",       # test names are the documentation
+    "EM101",   # inline messages keep test exceptions readable
+    "PLR2004", # magic values are the point of a test
+    "S101",    # assert is how tests assert
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ty.src]
+include = ["src", "tests"]
+
+[tool.ty.environment]
+python-version = "3.12"
+
+[tool.ty.rules]
+possibly-unresolved-reference = "error"
+
+# =============================================================================
+# Semantic Release — CI version bumps, changelog, releases
+# =============================================================================
+
+[tool.semantic_release]
+version_variables = ["src/failable/__init__.py:__version__"]
+build_command = """
+    set -e
+    uv lock
+    git add uv.lock
+    uv build
+"""  # includes commands to avoid a stale uv.lock
+build_command_env = []
+commit_parser = "conventional"
+commit_message = "chore(release): {version}\n\nSee CHANGELOG.md for more details. [skip ci]"
+commit_author = "semantic-release <semantic-release@ci>"
+tag_format = "v{version}"
+# TODO: remove both once api stable.
+allow_zero_version = true
+major_on_zero = false
+
+[tool.semantic_release.remote]
+type = "github"
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
+prerelease = false
+
+[tool.semantic_release.branches.alpha]
+match = ".*"
+prerelease_token = "alpha"
+prerelease = true
+
+# =============================================================================
+# Commitizen — Local commit message format enforcement only
+# =============================================================================
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
