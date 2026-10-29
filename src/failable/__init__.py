@@ -19,4 +19,4 @@ from ._result import Err, Ok, Result
 __all__ = ["Err", "FailableDecorator", "Ok", "Result", "failable"]
 
 # Managed by semantic-release; 0.0.0 means nothing has been released yet.
-__version__ = "0.0.0"
+__version__ = "0.1.0"
