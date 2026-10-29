@@ -110,13 +110,7 @@ possibly-unresolved-reference = "error"
 
 [tool.semantic_release]
 version_variables = ["src/failable/__init__.py:__version__"]
-build_command = """
-    set -e
-    uv lock
-    git add uv.lock
-    uv build
-"""  # includes commands to avoid a stale uv.lock
-build_command_env = []
+build_command = "uv build"
 commit_parser = "conventional"
 commit_message = "chore(release): {version}\n\nSee CHANGELOG.md for more details. [skip ci]"
 commit_author = "semantic-release <semantic-release@ci>"
